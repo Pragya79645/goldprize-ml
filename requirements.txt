@@ -1,6 +1,4 @@
-flask
-flask-cors
-numpy
+streamlit
 pandas
+numpy
 scikit-learn
-pickle-mixin
