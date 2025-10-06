@@ -43,10 +43,17 @@ st.markdown("""
     }
     
     .subtitle {
-        color: #666;
+        color: #999;
         font-size: 1.2rem;
         font-weight: 300;
         margin-top: 0.5rem;
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .subtitle {
+            color: #aaa;
+        }
     }
     
     /* Divider */
@@ -256,6 +263,50 @@ st.markdown("""
         border-radius: 15px;
         border: 1px solid #e0e0e0;
         margin: 1.5rem 0;
+    }
+    
+    /* Dark mode adjustments */
+    @media (prefers-color-scheme: dark) {
+        .stExpander {
+            background: #1e1e1e;
+            border-color: #3a3a3a;
+        }
+        
+        .input-section {
+            background: #1e1e1e;
+            border-color: #3a3a3a;
+        }
+        
+        .stNumberInput > div > div > input {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+        
+        .stNumberInput > div > div > input:focus {
+            background: #1e1e1e;
+        }
+        
+        .stNumberInput > label {
+            color: #e0e0e0;
+        }
+        
+        .section-title {
+            color: #e0e0e0;
+        }
+        
+        .metrics-container {
+            background: #1e1e1e;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .metrics-title {
+            color: #e0e0e0;
+        }
+        
+        div[data-testid="stMetricLabel"] {
+            color: #aaa;
+        }
     }
     
     /* Footer */
