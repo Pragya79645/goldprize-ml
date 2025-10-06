@@ -3,20 +3,411 @@ import pandas as pd
 import numpy as np
 import pickle
 
+# Page configuration
+st.set_page_config(
+    page_title="Gold Price Predictor",
+    page_icon="💰",
+    layout="centered"
+)
+
+# Custom CSS for better styling and alignment
+st.markdown("""
+    <style>
+    /* Global Styles */
+    .main {
+        padding: 1rem 2rem;
+    }
+    
+    .block-container {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        max-width: 900px;
+    }
+    
+    /* Header Styling */
+    .header-container {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+    }
+    
+    .main-title {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        letter-spacing: -1px;
+    }
+    
+    .subtitle {
+        color: #666;
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-top: 0.5rem;
+    }
+    
+    /* Divider */
+    .custom-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #FFD700, transparent);
+        margin: 2rem 0;
+        border: none;
+    }
+    
+    /* Input Section */
+    .input-section {
+        background: #ffffff;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .section-title {
+        color: #333;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    /* Input Fields Alignment */
+    .stNumberInput > div > div > input {
+        text-align: left;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        border: 2px solid #e8e8e8;
+        transition: all 0.3s ease;
+        padding: 0.75rem 1rem;
+        background: #fafafa;
+    }
+    
+    .stNumberInput > div > div > input:focus {
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
+        background: white;
+    }
+    
+    .stNumberInput > label {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Input control buttons */
+    .stNumberInput button {
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        color: #666;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .stNumberInput button:hover {
+        background: #FFD700;
+        border-color: #FFD700;
+        color: #000;
+    }
+    
+    /* Button Styling */
+    .stButton {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 2.5rem 0 !important;
+    }
+    
+    .stButton > div {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+    
+    .stButton>button {
+        width: 100% !important;
+        max-width: 450px !important;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        padding: 1.1rem 3rem !important;
+        border-radius: 50px !important;
+        border: none !important;
+        box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4) !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+        display: block !important;
+        margin: 0 auto !important;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 35px rgba(255, 165, 0, 0.5) !important;
+        background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%) !important;
+    }
+    
+    .stButton>button:active {
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Prediction Box */
+    .prediction-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+    
+    .prediction-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 2rem;
+        border-radius: 25px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        width: 100%;
+        max-width: 600px;
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .prediction-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    
+    .prediction-value {
+        font-size: 4rem;
+        font-weight: 800;
+        color: #FFD700;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        margin: 1rem 0;
+        line-height: 1;
+    }
+    
+    .prediction-subtext {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        margin-top: 1rem;
+        font-style: italic;
+    }
+    
+    /* Metrics Section */
+    .metrics-container {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+    
+    .metrics-title {
+        text-align: center;
+        color: #333;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    div[data-testid="stMetricValue"] {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #FFD700;
+        text-align: center;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        text-align: center;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.9rem;
+    }
+    
+    /* Info Box */
+    .stExpander {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e0e0e0;
+        margin: 1.5rem 0;
+    }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #888;
+        padding: 2rem 0;
+        margin-top: 3rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .footer em {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Load the trained model
-model = pickle.load(open('regressor_model.pkl', 'rb'))
+try:
+    model = pickle.load(open('regressor_model.pkl', 'rb'))
+    model_loaded = True
+except:
+    model_loaded = False
 
-st.title("🏆 Gold Price Prediction App")
-st.write("Enter the values below to predict gold price.")
+# Header
+st.markdown("""
+    <div class="header-container">
+        <h1 class="main-title">💰 Gold Price Predictor</h1>
+        <p class="subtitle">Powered by Advanced Machine Learning</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# Input fields
-spx = st.number_input("SPX (S&P 500 Index)", value=1500.0)
-uso = st.number_input("USO (Oil Price)", value=50.0)
-slv = st.number_input("SLV (Silver Price)", value=20.0)
-eur_usd = st.number_input("EUR/USD Exchange Rate", value=1.2)
+if not model_loaded:
+    st.error("⚠️ Model file not found. Please ensure 'regressor_model.pkl' is in the same directory.")
+    st.stop()
 
-# Predict button
-if st.button("Predict"):
-    input_data = np.array([[spx, uso, slv, eur_usd]])
-    prediction = model.predict(input_data)
-    st.success(f"💰 Predicted Gold Price: {prediction[0]:.2f}")
+# Information section
+with st.expander("ℹ️ About This Application"):
+    st.markdown("""
+    This application uses a sophisticated machine learning model to predict gold prices based on key market indicators:
+    
+    - **SPX (S&P 500)**: Benchmark US stock market index
+    - **USO (Oil Price)**: United States Oil Fund tracking crude oil
+    - **SLV (Silver)**: Silver prices, often correlated with gold
+    - **EUR/USD**: Euro to US Dollar exchange rate
+    
+    Simply enter current market values to receive an instant prediction.
+    """)
+
+st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+
+# Input section
+st.markdown('<p class="section-title">📊 Market Indicators</p>', unsafe_allow_html=True)
+
+# Create perfectly aligned input fields
+col1, col2 = st.columns(2, gap="large")
+
+with col1:
+    spx = st.number_input(
+        "📈 S&P 500 Index (SPX)",
+        min_value=0.0,
+        max_value=10000.0,
+        value=4500.0,
+        step=10.0,
+        help="Current S&P 500 index value",
+        key="spx"
+    )
+    
+    slv = st.number_input(
+        "🥈 Silver Price (SLV)",
+        min_value=0.0,
+        max_value=100.0,
+        value=24.0,
+        step=0.5,
+        help="Current silver price in USD",
+        key="slv"
+    )
+
+with col2:
+    uso = st.number_input(
+        "🛢️ Oil Price (USO)",
+        min_value=0.0,
+        max_value=200.0,
+        value=75.0,
+        step=1.0,
+        help="Current crude oil price",
+        key="uso"
+    )
+    
+    eur_usd = st.number_input(
+        "💱 EUR/USD Rate",
+        min_value=0.0,
+        max_value=2.0,
+        value=1.08,
+        step=0.01,
+        help="Current Euro to USD exchange rate",
+        key="eur"
+    )
+
+st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
+
+# Centered predict button - Fixed alignment
+predict_button = st.button("🔮 Predict Gold Price", use_container_width=True)
+
+# Prediction results
+if predict_button:
+    with st.spinner("🔍 Analyzing market data..."):
+        import time
+        time.sleep(0.5)  # Brief pause for effect
+        
+        input_data = np.array([[spx, uso, slv, eur_usd]])
+        prediction = model.predict(input_data)
+        
+        st.markdown(f"""
+        <div class="prediction-container">
+            <div class="prediction-box">
+                <div class="prediction-label">Predicted Gold Price</div>
+                <div class="prediction-value">${prediction[0]:,.2f}</div>
+                <div class="prediction-subtext">Based on current market indicators</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Metrics summary
+        st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
+        st.markdown('<p class="metrics-title">📌 Input Summary</p>', unsafe_allow_html=True)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("SPX", f"{spx:,.0f}")
+        with col2:
+            st.metric("USO", f"${uso:.2f}")
+        with col3:
+            st.metric("SLV", f"${slv:.2f}")
+        with col4:
+            st.metric("EUR/USD", f"{eur_usd:.4f}")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer
+st.markdown("""
+<div class="footer">
+    <p>⚠️ <em>Disclaimer: This prediction is for educational and informational purposes only.<br>
+    Always consult professional financial advisors before making investment decisions.</em></p>
+</div>
+""", unsafe_allow_html=True)
